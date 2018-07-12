@@ -1,0 +1,15 @@
+FROM nicholasjackson/consul_connect_agent:latest
+
+RUN wget https://github.com/hashicorp/http-echo/releases/download/v0.2.3/http-echo_0.2.3_linux_amd64.zip -O /http-echo.zip
+RUN unzip /http-echo.zip
+
+RUN rm -rf /etc/consul.d
+RUN mkdir /etc/consul.d/
+
+COPY ./service_startup.sh /service_startup.sh
+RUN chmod +x /service_startup.sh
+
+EXPOSE 8443
+EXPOSE 9301
+
+ENTRYPOINT /service_startup.sh

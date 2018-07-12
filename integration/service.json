@@ -1,0 +1,11 @@
+{
+  "name": "http-echo",
+  "port": 8080,
+  "connect": {
+    "proxy": {
+      "config": {
+        "bind_port": 8443
+      }
+    }
+  }
+}
