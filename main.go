@@ -3,7 +3,6 @@ package main
 import (
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/connect"
@@ -11,18 +10,12 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-var consulAddr = flag.String("consul_addr", "http://127.0.0.1:8500", "")
+var consulAddr = flag.String("consul_addr", "http://127.0.0.1:8500", "Address of Consul agent")
 var upstream = flag.StringSlice("upstream", nil, "define upstreams with [service]#[path] i.e http-echo#/")
 
 var httpClient *http.Client
-var upstreams []Upstream
+var upstreams Upstreams
 var logger log.Logger
-
-// Upstream defines a struct to encapsulate upstream info
-type Upstream struct {
-	Host string
-	Path string
-}
 
 func main() {
 	flag.Parse()
@@ -33,7 +26,12 @@ func main() {
 	config := api.DefaultConfig()
 	config.Address = *consulAddr
 
-	upstreams = parseUpstreams()
+	var err error
+	upstreams, err = NewUpstreams(*upstream)
+	if err != nil {
+		logger.Error("Unable to parse upstreams", "error", err)
+	}
+
 	logger.Info("Upstreams configuration", "upstreams", upstreams)
 
 	// Create a Consul API client
@@ -59,36 +57,21 @@ func main() {
 	http.ListenAndServe(":8181", nil)
 }
 
-func parseUpstreams() []Upstream {
-	us := make([]Upstream, 0)
-
-	for _, v := range *upstream {
-		parts := strings.Split(v, "#")
-		us = append(us, Upstream{
-			Host: parts[0],
-			Path: parts[1],
-		})
-	}
-
-	return us
-}
-
 func handler(rw http.ResponseWriter, r *http.Request) {
 	//find the upstream
-	for _, us := range upstreams {
-		if strings.HasPrefix(r.URL.Path, us.Path) {
-			resp, err := httpClient.Get("https://" + us.Host + ".service.consul")
-			if err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			defer resp.Body.Close()
-			io.Copy(rw, resp.Body)
-			return
-		}
+	us := upstreams.FindUpstream(r.URL.Path)
+	if us == nil {
+		logger.Error("No upstream defined", "path", r.URL.Path)
+		http.Error(rw, "No upstream defined for path", http.StatusNotFound)
+		return
 	}
 
-	logger.Error("No upstream defined", "path", r.URL.Path)
-	http.Error(rw, "No upstream defined for path", http.StatusNotFound)
+	resp, err := httpClient.Get("https://" + us.Host + ".service.consul")
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	defer resp.Body.Close()
+	io.Copy(rw, resp.Body)
 }

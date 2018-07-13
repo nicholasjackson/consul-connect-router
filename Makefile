@@ -1,5 +1,5 @@
 run:
-	go run main.go
+	go run main.go upstream.go --upstream "db#/"
 
 build:
 	goreleaser --snapshot --rm-dist --skip-publish
