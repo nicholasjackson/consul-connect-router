@@ -24,3 +24,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/hashicorp/go-hclog"
+
+[[constraint]]
+  name = "github.com/hashicorp/consul"
+  revision = "fa29fee4b6a1353c565fdc5067e5ba08e2c0229f"

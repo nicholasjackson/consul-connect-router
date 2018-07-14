@@ -34,8 +34,7 @@
     "types",
     "watch"
   ]
-  revision = "39f93f011e591c842acc8053a7f5972aa6e592fd"
-  version = "v1.2.1"
+  revision = "fa29fee4b6a1353c565fdc5067e5ba08e2c0229f"
 
 [[projects]]
   branch = "master"
@@ -267,6 +266,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "706634a9db68bd1988322695bb7a2c2bc262bc286bfdf7c6d635758d4124f913"
+  inputs-digest = "72b2ded4fa300137ab3e7706a617504c5c1e982187caf0e3d4a79f08138bb034"
   solver-name = "gps-cdcl"
   solver-version = 1
