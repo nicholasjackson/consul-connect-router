@@ -10,6 +10,15 @@ archive:
     windows: Windows
     386: i386
     amd64: x86_64
+dockers:
+  - image: nicholasjackson/consul-connect-router
+    goos: linux
+    goarch: amd64
+    tag_templates:
+    - "{{ .Tag }}"
+    - "v{{ .Major }}"
+    - latest
+    dockerfile: Dockerfile
 checksum:
   name_template: 'checksums.txt'
 snapshot:

@@ -3,6 +3,8 @@ This project is a simple HTTP based API gateway for Consul Connect
 
 The router can be run at the edge of a system and send upstream requests to connect proxies.
 
+NOTE: Code is kinda janky while building proof of concept  
+
 ## Running
 
 Upstreams are configured using the --upstream flag which takes is a string in the form of `[service]#[path]`  

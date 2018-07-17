@@ -1,0 +1,16 @@
+{
+  "name": "socat-echo",
+  "port": 8080,
+  "connect": {
+    "proxy": {
+      "config": {
+        "bind_port": 8444,
+        "upstreams": [{
+          "destination_name": "http-echo",
+          "local_bind_port": 9000
+      }
+        ]
+      }
+    }
+  }
+}
