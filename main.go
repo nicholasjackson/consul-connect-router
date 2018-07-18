@@ -132,11 +132,13 @@ func handler(rw http.ResponseWriter, r *http.Request) {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		// make sure to set the http status code
-		rw.WriteHeader(resp.StatusCode)
-		return
-	}
+	/*
+		if resp.StatusCode != http.StatusOK {
+			// make sure to set the http status code
+			rw.WriteHeader(resp.StatusCode)
+			return
+		}
+	*/
 
 	// set the response headers
 	for header, values := range resp.Header {
@@ -145,5 +147,6 @@ func handler(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	rw.WriteHeader(resp.StatusCode)
 	io.Copy(rw, resp.Body)
 }
