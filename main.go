@@ -30,7 +30,7 @@ func main() {
 	flag.Parse()
 
 	logger = log.Default()
-	logger.Info("Starting Connect Router", "version", "0.1")
+	logger.Info("Starting Connect Router", "version", "0.2")
 
 	config := api.DefaultConfig()
 	config.Address = *consulAddr
@@ -132,13 +132,18 @@ func handler(rw http.ResponseWriter, r *http.Request) {
 
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		// make sure to set the http status code
+		rw.WriteHeader(resp.StatusCode)
+		return
+	}
+
 	// set the response headers
 	for header, values := range resp.Header {
 		for _, value := range values {
-			rw.Header().Set(header, value)
+			rw.Header().Add(header, value)
 		}
 	}
 
-	rw.WriteHeader(http.StatusOK)
 	io.Copy(rw, resp.Body)
 }

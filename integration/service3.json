@@ -1,0 +1,11 @@
+{
+  "name": "http-api",
+  "port": 9090,
+  "connect": {
+    "proxy": {
+      "config": {
+        "bind_port": 8443
+      }
+    }
+  }
+}
