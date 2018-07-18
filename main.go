@@ -139,5 +139,6 @@ func handler(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	rw.WriteHeader(http.StatusOK)
 	io.Copy(rw, resp.Body)
 }
