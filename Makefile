@@ -4,6 +4,15 @@ run:
 build:
 	goreleaser --snapshot --rm-dist --skip-publish
 
+goconvey:
+	goconvey -excludedDirs 'integration,vendor'
+
+functional_test:
+	cd integration && go test -v --godog.format=pretty --godog.random
+
+functional_test_proto:
+	protoc -I ./integration/grpc/ integration/grpc/echo.proto --go_out=plugins=grpc:integration/grpc
+
 run_proxy_http:
 	http-echo -listen 127.0.0.1:8087 -text hello 2>"/tmp/http_echo.out" &
 	curl -s -X PUT -d @"$(shell pwd)/integration/service.json" "http://127.0.0.1:8500/v1/agent/service/register" | jq

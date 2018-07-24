@@ -3,6 +3,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/DATA-DOG/godog"
+  packages = [".","colors","gherkin"]
+  revision = "943635096a91d89d87b4bb07c395d96843a27c2f"
+
+[[projects]]
+  branch = "master"
   name = "github.com/armon/go-metrics"
   packages = ["."]
   revision = "3c58d8115a78a6879e5df75ae900846768d36895"
@@ -58,7 +64,7 @@
   branch = "master"
   name = "github.com/hashicorp/go-multierror"
   packages = ["."]
-  revision = "12f8a7e29b823bba3e5ca3d9526b96ddfca48906"
+  revision = "3d5d8f294aa03d8e98859feac328afbdf1ae0703"
 
 [[projects]]
   branch = "master"
@@ -82,7 +88,7 @@
   branch = "master"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
-  revision = "78879f5e1be14bb4812abd0bb547a923b5aeac23"
+  revision = "270f2f71b1ee587f3b609f00f422b76a6b28f348"
 
 [[projects]]
   branch = "master"
@@ -190,13 +196,13 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ed25519","ed25519/internal/edwards25519"]
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["bpf","http/httpguts","http2","http2/hpack","idna","internal/iana","internal/socket","ipv4","ipv6"]
-  revision = "d0887baf81f4598189d4e12a37c6da86f0bba4d0"
+  revision = "a680a1efc54dd51c040b3b5ce4939ea3cf2ea0d1"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -207,6 +213,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6369add754443e8a5c11d4ad0776db93c85fc1710dd36509669d60ef6c08af69"
+  inputs-digest = "cca450201613089e9de16e46a982475e7d6725b6ff09034b41db085658aa3400"
   solver-name = "gps-cdcl"
   solver-version = 1

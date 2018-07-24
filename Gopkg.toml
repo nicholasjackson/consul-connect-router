@@ -28,3 +28,7 @@
 [[constraint]]
   name = "github.com/hashicorp/consul"
   revision = "4ec8c489c077b7c863ab9a7dc2344a45ea65a4da"
+
+[[constraint]]
+  name = "github.com/DATA-DOG/godog"
+  branch = "master"

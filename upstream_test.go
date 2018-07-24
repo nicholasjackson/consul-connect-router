@@ -1,10 +1,10 @@
-package main
+package router
 
 import "testing"
 
 func TestNewCreatesUpstreamCollection(t *testing.T) {
 	flags := []string{
-		"db#/",
+		"service=db#path=/#type=http#strip_prefix=/",
 	}
 
 	us, err := NewUpstreams(flags)
@@ -19,10 +19,10 @@ func TestNewCreatesUpstreamCollection(t *testing.T) {
 
 func TestNewSortsCorrectly(t *testing.T) {
 	flags := []string{
-		"blah#/blah",
-		"something#/api/something",
-		"frontend#/",
-		"api#/api",
+		"service=blah#path=/blah",
+		"service=something#path=/api/something",
+		"service=frontend#path=/",
+		"service=api#path=/api",
 	}
 
 	us, err := NewUpstreams(flags)
@@ -37,10 +37,10 @@ func TestNewSortsCorrectly(t *testing.T) {
 
 func TestFindReturnsPath(t *testing.T) {
 	flags := []string{
-		"blah#/blah",
-		"something#/api/something",
-		"frontend#/",
-		"api#/api",
+		"service=blah#path=/blah",
+		"service=something#path=/api/something",
+		"service=frontend#path=/",
+		"service=api#path=/api",
 	}
 
 	us, err := NewUpstreams(flags)

@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/watch"
+	"golang.org/x/net/http2"
 )
 
 // Service represents a Consul service that accepts and/or connects via Connect.
@@ -241,14 +242,9 @@ func (s *Service) HTTPClient() *http.Client {
 		// this and/or compatibility with http.Request.WithContext.
 		DialTLS: s.HTTPDialTLS,
 	}
-
-	// Create a transport with defaults
-	//t := http.DefaultTransport.(*http.Transport)
-	//t.DialTLS = s.HTTPDialTLS
-
 	// Need to manually re-enable http2 support since we set custom DialTLS.
 	// See https://golang.org/src/net/http/transport.go?s=8692:9036#L228
-	//http2.ConfigureTransport(t)
+	http2.ConfigureTransport(t)
 	return &http.Client{
 		Transport: t,
 	}

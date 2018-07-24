@@ -1,14 +1,22 @@
-package main
+package router
 
 import (
 	"sort"
 	"strings"
 )
 
+type ConnectionType string
+
+const HTTP ConnectionType = "http"
+
+const GRPC ConnectionType = "grpc"
+
 // Upstream defines a struct to encapsulate upstream info
 type Upstream struct {
-	Host string
-	Path string
+	Host        string
+	Path        string
+	Type        ConnectionType
+	StripPrefix string
 }
 
 // Upstreams is a collection of Upstream
@@ -45,11 +53,29 @@ func NewUpstreams(u []string) (Upstreams, error) {
 	us := Upstreams{}
 
 	for _, v := range u {
+		// split into kv pairs
 		parts := strings.Split(v, "#")
-		us = append(us, Upstream{
-			Host: parts[0],
-			Path: parts[1],
-		})
+		u := Upstream{}
+		for _, p := range parts {
+			kv := strings.Split(p, "=")
+
+			switch kv[0] {
+			case "service":
+				u.Host = kv[1]
+			case "path":
+				u.Path = kv[1]
+			case "type":
+				switch kv[1] {
+				case "http":
+					u.Type = HTTP
+				case "grpc":
+					u.Type = GRPC
+				}
+			case "strip_prefix":
+				u.StripPrefix = kv[1]
+			}
+		}
+		us = append(us, u)
 	}
 
 	// sort the upstreams to ensure that find always returns the longest path first
