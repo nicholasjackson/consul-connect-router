@@ -1,3 +1,5 @@
 dist/
 consul-connect-router
 .vscode
+.vs
+main

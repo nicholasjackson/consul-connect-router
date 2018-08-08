@@ -2,21 +2,26 @@ package router
 
 import (
 	"sort"
+	"strconv"
 	"strings"
 )
 
+// ConnectionType enforces the connect type for the route
 type ConnectionType string
 
+// HTTP ConnectionType
 const HTTP ConnectionType = "http"
 
+// GRPC ConnectionType
 const GRPC ConnectionType = "grpc"
 
 // Upstream defines a struct to encapsulate upstream info
 type Upstream struct {
-	Host        string
+	Service     string
 	Path        string
 	Type        ConnectionType
 	StripPrefix string
+	Port        int
 }
 
 // Upstreams is a collection of Upstream
@@ -55,13 +60,17 @@ func NewUpstreams(u []string) (Upstreams, error) {
 	for _, v := range u {
 		// split into kv pairs
 		parts := strings.Split(v, "#")
-		u := Upstream{}
+		u := Upstream{
+			Port: 8080,
+			Type: HTTP,
+		}
+
 		for _, p := range parts {
 			kv := strings.Split(p, "=")
 
 			switch kv[0] {
 			case "service":
-				u.Host = kv[1]
+				u.Service = kv[1]
 			case "path":
 				u.Path = kv[1]
 			case "type":
@@ -71,6 +80,12 @@ func NewUpstreams(u []string) (Upstreams, error) {
 				case "grpc":
 					u.Type = GRPC
 				}
+			case "port":
+				p, err := strconv.Atoi(kv[1])
+				if err != nil {
+					return nil, err
+				}
+				u.Port = p
 			case "strip_prefix":
 				u.StripPrefix = kv[1]
 			}

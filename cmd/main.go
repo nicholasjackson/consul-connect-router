@@ -16,6 +16,7 @@ import (
 var consulAddr = flag.String("consul_addr", "http://127.0.0.1:8500", "Address of Consul agent")
 var upstream = flag.StringSlice("upstream", nil, "define upstreams with [service]#[path] i.e http-echo#/")
 var listen = flag.String("listen", ":8181", "listen address i.e localhost:8181")
+var logLevel = flag.String("log_level", "info", "log level, info, debug, trace")
 
 var logger log.Logger
 
@@ -23,6 +24,14 @@ func main() {
 	flag.Parse()
 
 	logger = log.Default()
+
+	switch *logLevel {
+	case "debug":
+		logger.SetLevel(log.Debug)
+	case "trace":
+		logger.SetLevel(log.Trace)
+	}
+
 	config := api.DefaultConfig()
 	config.Address = *consulAddr
 
@@ -44,6 +53,7 @@ func main() {
 	handleSigTerm(r)
 
 	r.Run()
+	r.ListenAndServe()
 }
 
 func handleSigTerm(r *router.Router) {

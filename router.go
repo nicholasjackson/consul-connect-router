@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/connect"
@@ -44,7 +45,9 @@ func NewRouter(c *api.Client, l log.Logger, bind string, upstreams []string) (*R
 func (r *Router) Run() error {
 	var err error
 
-	r.logger.Info("Starting Connect Router", "version", "0.2")
+	r.logger.Info("Starting Connect Router", "version", "0.2", "listen_addr", r.bindAddress)
+
+	// Register the router as a Consul service
 	r.consulClient.Agent().ServiceRegister(&api.AgentServiceRegistration{Name: "connect-router"})
 
 	// Create an instance representing this service. "my-service" is the
@@ -55,17 +58,24 @@ func (r *Router) Run() error {
 	}
 	defer r.service.Close()
 
+	<-r.service.ReadyWait()
+
 	// Get an HTTP client
-	r.httpClient = r.service.HTTPClient()
+	r.httpClient = buildHTTPClient(r.service)
 
+	return nil
+}
+
+// ListenAndServe starts the router HTTP server
+func (r *Router) ListenAndServe() error {
 	// Set the handlers
-	http.HandleFunc("/", r.handler)
+	http.HandleFunc("/", r.Handler)
 
-	// setup the server
+	// Setup the HTTP server
 	r.server = &http.Server{}
 	r.server.Addr = r.bindAddress
 
-	err = r.server.ListenAndServe()
+	err := r.server.ListenAndServe()
 	if err != nil {
 		return err
 	}
@@ -78,7 +88,8 @@ func (r *Router) Stop(ctx context.Context) {
 	r.server.Shutdown(ctx)
 }
 
-func (r *Router) handler(rw http.ResponseWriter, req *http.Request) {
+// Handler defines the HTTP request handler for the router
+func (r *Router) Handler(rw http.ResponseWriter, req *http.Request) {
 	//find the upstream
 	us := r.upstreams.FindUpstream(req.URL.Path)
 	if us == nil {
@@ -96,7 +107,9 @@ func (r *Router) handler(rw http.ResponseWriter, req *http.Request) {
 		path = "/" + path
 	}
 
-	uri := "https://" + us.Host + ".service.consul" + path
+	uri := "https://" + us.Service + ".service.consul" + path
+
+	r.logger.Debug("Processing request", "uri", uri, "method", req.Method, "protocol", req.Proto)
 
 	proxyReq, err := http.NewRequest(req.Method, uri, req.Body)
 	if err != nil {
@@ -110,11 +123,12 @@ func (r *Router) handler(rw http.ResponseWriter, req *http.Request) {
 
 	for header, values := range req.Header {
 		for _, value := range values {
+			r.logger.Debug("Set request header", "header", header, "value", value)
 			proxyReq.Header.Add(header, value)
 		}
 	}
 
-	r.logger.Info("Attempting to request from upstream", "upstream", us.Host, "path", path)
+	r.logger.Info("Attempting to request from upstream", "upstream", us.Service, "uri", path, "method", proxyReq.Method, "protocol", proxyReq.Proto)
 
 	resp, err := r.httpClient.Do(proxyReq)
 	if err != nil {
@@ -128,10 +142,28 @@ func (r *Router) handler(rw http.ResponseWriter, req *http.Request) {
 	// set the response headers
 	for header, values := range resp.Header {
 		for _, value := range values {
+			r.logger.Debug("Set response header", "header", header, "value", value)
 			rw.Header().Add(header, value)
 		}
 	}
 
 	rw.WriteHeader(resp.StatusCode)
+
 	io.Copy(rw, resp.Body)
+}
+
+func buildHTTPClient(s *connect.Service) *http.Client {
+	t := &http.Transport{
+		TLSHandshakeTimeout: 20 * time.Second,
+		MaxIdleConns:        20,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     120 * time.Second,
+
+		DialTLS: s.HTTPDialTLS,
+	}
+
+	return &http.Client{
+		Transport: t,
+		Timeout:   10 * time.Second,
+	}
 }

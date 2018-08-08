@@ -1,0 +1,16 @@
+{
+  "name": "grpc-client",
+  "port": 9993,
+  "connect": {
+    "proxy": {
+      "config": {
+        "bind_port": 8445,
+        "upstreams": [{
+          "destination_name": "grpc-service",
+          "local_bind_port": 9011
+      }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "grpc-service",
+  "id":"grpc-service-2",
+  "port": 9999,
+  "connect": {
+    "proxy": {
+      "config": {
+        "bind_port": 8444
+      }
+    }
+  }
+}

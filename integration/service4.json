@@ -1,0 +1,11 @@
+{
+  "name": "http-tls",
+  "port": 8943,
+  "connect": {
+    "proxy": {
+      "config": {
+        "bind_port": 8743
+      }
+    }
+  }
+}

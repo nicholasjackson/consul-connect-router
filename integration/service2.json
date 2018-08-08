@@ -5,10 +5,15 @@
     "proxy": {
       "config": {
         "bind_port": 8444,
-        "upstreams": [{
-          "destination_name": "http-echo",
-          "local_bind_port": 9000
-      }
+        "upstreams": [
+          {
+            "destination_name": "http-echo",
+            "local_bind_port": 9000
+          },
+          {
+            "destination_name": "http-tls",
+            "local_bind_port": 9001
+          }
         ]
       }
     }
