@@ -13,5 +13,5 @@ Upstreams are configured using the --upstream flag which takes is a string in th
 The following example would route all requests received at the path (including subpaths) `/api` to the `api` service.  Requests received at the path `/` would be routed to the `frontend` service.
 
 ```bash
-connect-router --upstream "api#/api" --upstream "frontend#/"
+connect-router --upstream "service=api#path=/api" --upstream "service=frontend#path=/"
 ```
