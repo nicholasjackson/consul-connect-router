@@ -15,21 +15,31 @@ import (
 
 // Router is an instance of a Consul Connect Router
 type Router struct {
-	consulClient *api.Client
-	httpClient   HTTPClient
-	upstreams    Upstreams
-	logger       log.Logger
-	service      *connect.Service
-	bindAddress  string
-	server       *http.Server
+	consulClient          *api.Client
+	httpClient            HTTPClient
+	upstreams             Upstreams
+	logger                log.Logger
+	service               ConnectService
+	bindAddress           string
+	server                *http.Server
+	httpClientFactory     func(ConnectService) HTTPClient
+	connectServiceFactory func(name string) (ConnectService, error)
+	registerService       func(*api.AgentServiceRegistration)
 }
 
 // NewRouter creates a new instance of the Router
 func NewRouter(c *api.Client, l log.Logger, bind string, upstreams []string) (*Router, error) {
 	r := &Router{
-		consulClient: c,
-		logger:       l,
-		bindAddress:  bind,
+		consulClient:      c,
+		logger:            l,
+		bindAddress:       bind,
+		httpClientFactory: buildHTTPClient,
+		registerService: func(asr *api.AgentServiceRegistration) {
+			c.Agent().ServiceRegister(asr)
+		},
+		connectServiceFactory: func(name string) (ConnectService, error) {
+			return connect.NewService(name, c)
+		},
 	}
 
 	var err error
@@ -48,15 +58,14 @@ func (r *Router) Run() error {
 	r.logger.Info("Starting Connect Router", "version", "0.2", "listen_addr", r.bindAddress)
 
 	// Register the router as a Consul service
-	r.consulClient.Agent().ServiceRegister(&api.AgentServiceRegistration{Name: "connect-router"})
+	r.registerService(&api.AgentServiceRegistration{Name: "connect-router"})
 
 	// Create an instance representing this service. "my-service" is the
 	// name of _this_ service. The service should be cleaned up via Close.
-	r.service, err = connect.NewService("connect-router", r.consulClient)
+	r.service, err = r.connectServiceFactory("connect-router")
 	if err != nil {
 		return err
 	}
-	defer r.service.Close()
 
 	<-r.service.ReadyWait()
 
@@ -152,7 +161,7 @@ func (r *Router) Handler(rw http.ResponseWriter, req *http.Request) {
 	io.Copy(rw, resp.Body)
 }
 
-func buildHTTPClient(s *connect.Service) *http.Client {
+func buildHTTPClient(s ConnectService) HTTPClient {
 	t := &http.Transport{
 		TLSHandshakeTimeout: 20 * time.Second,
 		MaxIdleConns:        20,

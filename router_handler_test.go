@@ -14,6 +14,7 @@ import (
 
 var mockHTTPClient *MockHTTPClient
 var httpResponse *http.Response
+var mockConnectService *MockConnectService
 
 func setupRouterTests(t *testing.T) *Router {
 	httpResponse = &http.Response{
@@ -22,6 +23,12 @@ func setupRouterTests(t *testing.T) *Router {
 
 	mockHTTPClient = &MockHTTPClient{}
 	mockHTTPClient.On("Do", mock.Anything).Return(httpResponse, nil)
+
+	cha := make(chan struct{}, 1)
+	cha <- struct{}{}
+	mockConnectService = &MockConnectService{}
+	mockConnectService.On("ReadyWait").Return(cha)
+	mockConnectService.On("Close").Return(nil)
 
 	r := &Router{
 		httpClient: mockHTTPClient,
