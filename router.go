@@ -16,7 +16,7 @@ import (
 // Router is an instance of a Consul Connect Router
 type Router struct {
 	consulClient *api.Client
-	httpClient   *http.Client
+	httpClient   HTTPClient
 	upstreams    Upstreams
 	logger       log.Logger
 	service      *connect.Service
