@@ -51,6 +51,14 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:6d6672f85a84411509885eaa32f597577873de00e30729b9bb0eb1e1faa49c12"
+  name = "github.com/eapache/go-resiliency"
+  packages = ["retrier"]
+  pruneopts = ""
+  revision = "ea41b0fad31007accc7f806884dcdf3da98b79ce"
+  version = "v1.1.0"
+
+[[projects]]
   digest = "1:f958a1c137db276e52f0b50efee41a1a389dcdded59a69711f3e872757dab34b"
   name = "github.com/golang/protobuf"
   packages = [
@@ -433,11 +441,14 @@
     "github.com/DATA-DOG/godog/gherkin",
     "github.com/aws/aws-lambda-go/events",
     "github.com/aws/aws-lambda-go/lambda",
+    "github.com/eapache/go-resiliency/retrier",
     "github.com/golang/protobuf/proto",
     "github.com/hashicorp/consul/api",
     "github.com/hashicorp/consul/connect",
     "github.com/hashicorp/go-hclog",
     "github.com/spf13/pflag",
+    "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/mock",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
   ]

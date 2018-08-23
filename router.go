@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/eapache/go-resiliency/retrier"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/connect"
 	log "github.com/hashicorp/go-hclog"
@@ -139,11 +140,23 @@ func (r *Router) Handler(rw http.ResponseWriter, req *http.Request) {
 
 	r.logger.Info("Attempting to request from upstream", "upstream", us.Service, "uri", path, "method", proxyReq.Method, "protocol", proxyReq.Proto)
 
-	resp, err := r.httpClient.Do(proxyReq)
+	var resp *http.Response
+
+	// retry the request 3 times with a backoff
+	retry := retrier.New(retrier.ConstantBackoff(3, 200*time.Millisecond), nil)
+	err = retry.Run(func() error {
+		var localError error
+		resp, localError = r.httpClient.Do(proxyReq)
+		if localError != nil {
+			r.logger.Error("Unable to contact upstream", "error", localError)
+			return localError
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		r.logger.Error("Unable to contact upstream", "error", err)
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
 	}
 
 	defer resp.Body.Close()
