@@ -56,7 +56,7 @@ func NewRouter(c *api.Client, l log.Logger, bind string, upstreams []string) (*R
 func (r *Router) Run() error {
 	var err error
 
-	r.logger.Info("Starting Connect Router", "version", "0.2", "listen_addr", r.bindAddress)
+	r.logger.Info("Starting Connect Router", "version", "0.4", "listen_addr", r.bindAddress)
 
 	// Register the router as a Consul service
 	r.registerService(&api.AgentServiceRegistration{Name: "connect-router"})
@@ -117,6 +117,8 @@ func (r *Router) Handler(rw http.ResponseWriter, req *http.Request) {
 		path = "/" + path
 	}
 
+	query := req.URL.RawQuery
+
 	uri := "https://" + us.Service + ".service.consul" + path
 
 	r.logger.Debug("Processing request", "uri", uri, "method", req.Method, "protocol", req.Proto)
@@ -130,6 +132,7 @@ func (r *Router) Handler(rw http.ResponseWriter, req *http.Request) {
 
 	proxyReq.Header.Set("Host", req.Host)
 	proxyReq.Header.Set("X-Forwarded-For", req.RemoteAddr)
+	proxyReq.URL.RawQuery = query
 
 	for header, values := range req.Header {
 		for _, value := range values {
@@ -138,7 +141,7 @@ func (r *Router) Handler(rw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	r.logger.Info("Attempting to request from upstream", "upstream", us.Service, "uri", path, "method", proxyReq.Method, "protocol", proxyReq.Proto)
+	r.logger.Info("Attempting to request from upstream", "upstream", us.Service, "uri", path, "query", query, "method", proxyReq.Method, "protocol", proxyReq.Proto)
 
 	var resp *http.Response
 
@@ -157,6 +160,7 @@ func (r *Router) Handler(rw http.ResponseWriter, req *http.Request) {
 
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	defer resp.Body.Close()

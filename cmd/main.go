@@ -14,7 +14,7 @@ import (
 )
 
 var consulAddr = flag.String("consul_addr", "http://127.0.0.1:8500", "Address of Consul agent")
-var upstream = flag.StringSlice("upstream", nil, "define upstreams with [service]#[path] i.e http-echo#/")
+var upstream = flag.StringSlice("upstream", nil, "define upstreams with service=[service]#path=[path] i.e service=http-echo#path=/")
 var listen = flag.String("listen", ":8181", "listen address i.e localhost:8181")
 var logLevel = flag.String("log_level", "info", "log level, info, debug, trace")
 

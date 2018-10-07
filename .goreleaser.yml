@@ -1,8 +1,10 @@
+---
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
 builds:
-- env:
-  - CGO_ENABLED=0
+  - main: ./cmd/main.go
+    env:
+      - CGO_ENABLED=0
 archive:
   replacements:
     darwin: Darwin
@@ -15,9 +17,9 @@ dockers:
     goos: linux
     goarch: amd64
     tag_templates:
-    - "{{ .Tag }}"
-    - "v{{ .Major }}"
-    - latest
+      - "{{ .Tag }}"
+      - "v{{ .Major }}"
+      - latest
     dockerfile: Dockerfile
 checksum:
   name_template: 'checksums.txt'
@@ -27,5 +29,5 @@ changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
+      - '^docs:'
+      - '^test:'
